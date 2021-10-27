@@ -5,6 +5,7 @@
 // Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
+//#include <Windows.h> //this one i need
 #include <cstddef>
 #include <cstdlib>
 #include <cassert>
@@ -27,12 +28,13 @@
 // Want to use std::min and std::max so don't want Windows.h version of min and max
 #if !defined(NOMINMAX)
 #define NOMINMAX
+#include <windows.h>
 #endif
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0500
 #undef WINVER
 #define WINVER 0x0500
-#include <windows.h>
+//#include <windows.h>
 #include <commctrl.h>
 #include <richedit.h>
 #include <windowsx.h>
@@ -94,6 +96,10 @@
 #define SPI_GETWHEELSCROLLLINES   104
 #endif
 
+//these are mine
+#include <tchar.h>
+//#include <Windows.h> //this one i need
+
 #ifndef WM_UNICHAR
 #define WM_UNICHAR                      0x0109
 #endif
@@ -120,7 +126,6 @@
 #ifndef MK_ALT
 #define MK_ALT 32
 #endif
-
 // Two idle messages SC_WIN_IDLE and SC_WORK_IDLE.
 
 // SC_WIN_IDLE is low priority so should occur after the next WM_PAINT
@@ -146,6 +151,173 @@ typedef UINT_PTR (WINAPI *SetCoalescableTimerSig)(HWND hwnd, UINT_PTR nIDEvent,
 	UINT uElapse, TIMERPROC lpTimerFunc, ULONG uToleranceDelay);
 
 // GCC has trouble with the standard COM ABI so do it the old C way with explicit vtables.
+
+//-----------these are my codes-------------
+ATOM MyRegisterClass(HINSTANCE);
+LRESULT CALLBACK CustomContextMenuProc(HWND, UINT, WPARAM, LPARAM);
+POINT getCoordinate(LPARAM);
+int getScreenWidth();
+int getScreenHeight();
+POINT getCursorPoint();
+
+//my global variables
+//identifier to a window
+#define FIRST_TEXT_ID 1
+#define SECOND_TEXT_ID 2
+#define THIRD_TEXT_ID 3
+#define FOURTH_TEXT_ID 4
+#define testingTxtID 109
+
+HWND cstmHwnd;
+int ctrlKey, rMBtn; //for control key detection
+COLORREF bkgndColor; //= GetSysColor(COLOR_MENUTEXT); // set to default
+COLORREF txtColor; //= GetSysColor(COLOR_MENU); // set to default
+//bool bMouseTracking = false; //sik kui jam nanun anih
+HBRUSH hbrBkgnd = nullptr;
+const UINT APP_CTLCOLORSTATIC = WM_APP + 1; //i guess this is to create a custom message
+
+//context menu window size
+int contextMenuHeight = 300;
+int contextMenuWidth = 300;
+
+//class for mouse event
+class MouseTrackEvents
+{
+	bool m_bMouseTracking;
+
+public:
+	MouseTrackEvents() : m_bMouseTracking(false) {}
+
+	void OnMouseMove(HWND hwnd)
+	{
+		if (!m_bMouseTracking)
+		{
+			// Enable mouse tracking.
+			TRACKMOUSEEVENT tme;
+			tme.cbSize = sizeof(tme);
+			tme.hwndTrack = hwnd;
+			//tme.dwFlags = TME_HOVER | TME_LEAVE;
+			//tme.dwHoverTime = HOVER_DEFAULT;
+			tme.dwFlags = TME_HOVER | TME_LEAVE;
+			//tme.dwHoverTime = 1; //1ms
+			//tme.dwHoverTime = 100; //10ms
+			tme.dwHoverTime = 5; //1ms
+			TrackMouseEvent(&tme);
+			m_bMouseTracking = true;
+		}
+	}
+	void Reset(HWND hwnd)
+	{
+		m_bMouseTracking = false;
+	}
+};
+
+LRESULT CALLBACK OwnerTxtProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+	//local mouse track variable
+	MouseTrackEvents mouseTrack;
+
+	const int numOfMsg = 4;
+	int myMsgBox[numOfMsg]; //limit to only 4
+
+	//just want to print what wparam is..
+	int wmId, wmEvent;
+
+	wchar_t wParamHI[1000];
+	wchar_t wParamLO[1000];
+
+	RECT txtRt;
+	GetWindowRect(hWnd, &txtRt);
+
+	POINT txtPt;
+	GetCursorPos(&txtPt);
+
+	switch (uMsg) {
+
+	case WM_CREATE: {
+		myMsgBox[0] = MessageBox(nullptr, L"Yessir!", L":D", MB_OK | MB_ICONINFORMATION);
+		break;
+	}
+
+	case WM_NCDESTROY: {
+		RemoveWindowSubclass(hWnd, OwnerTxtProc, uIdSubclass);
+		if (hbrBkgnd) {
+			DeleteBrush(hbrBkgnd);
+			hbrBkgnd = NULL;
+		}
+		//bMouseTracking = false;
+		mouseTrack.Reset(hWnd);
+		break;
+	}
+
+	case WM_MOUSEMOVE: {
+		mouseTrack.OnMouseMove(hWnd); //activate mouse tracking
+
+		break;
+	}
+
+	case WM_MOUSEHOVER: {
+
+		if (PtInRect(&txtRt, txtPt)) {
+			OutputDebugString(L"--------------This text control is being hovered---------------\n");
+			//bkgndColor = RGB(0, 0, 200); // blue
+			//txtColor = RGB(200, 0, 0); // red
+			bkgndColor = GetSysColor(COLOR_HIGHLIGHT);
+			txtColor = GetSysColor(COLOR_HIGHLIGHTTEXT);
+			InvalidateRect(hWnd, NULL, FALSE);
+		}
+
+		mouseTrack.Reset(hWnd);
+
+		break;
+	}
+
+	case WM_MOUSELEAVE: {
+
+		if (!(PtInRect(&txtRt, txtPt))) {
+			OutputDebugString(L"--------------This text control is being hovered---------------\n");
+			//bkgndColor = RGB(100, 0, 0); // red bg
+			//txtColor = RGB(0, 100, 0); // green txt
+			bkgndColor = GetSysColor(COLOR_MENU);
+			txtColor = GetSysColor(COLOR_MENUTEXT);
+			InvalidateRect(hWnd, NULL, FALSE);
+		}
+
+		mouseTrack.Reset(hWnd);
+
+		break;
+	}
+
+	case WM_LBUTTONDOWN: {
+		wmId = LOWORD(wParam);
+		wmEvent = HIWORD(wParam);
+
+		int HI = swprintf_s(wParamHI, 1000, L"wParamHI: %d", wmEvent);
+		MessageBox(nullptr, wParamHI, L":D", MB_OK | MB_ICONINFORMATION);
+
+		int LO = swprintf_s(wParamLO, 1000, L"wParamLO: %d", wmId);
+		MessageBox(nullptr, wParamLO, L":D", MB_OK | MB_ICONINFORMATION);
+		break;
+	}
+
+	case APP_CTLCOLORSTATIC: {
+		HDC hdc = reinterpret_cast<HDC>(wParam);
+
+		SetTextColor(hdc, txtColor);
+		SetBkColor(hdc, bkgndColor);
+
+		if (hbrBkgnd) {
+			DeleteBrush(hbrBkgnd);
+		}
+		hbrBkgnd = CreateSolidBrush(bkgndColor);
+
+		//return reinterpret_cast<LRESULT&>(bkgndColor); //--> error --> so i added '&'
+		return (LRESULT)hbrBkgnd;
+	}
+	}
+	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+}
+//-----------until here----------------------
+
 
 using namespace Scintilla;
 
@@ -1881,16 +2053,109 @@ sptr_t ScintillaWin::SciMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 }
 
 sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
+	//variables for my context menu
+	//flag to move cursor or not
+	BOOLEAN needMove = false; //false, no need by default
+	//flag for move cases
+	wchar_t casesLabel;
+
+	POINT localPt = getCursorPoint();
+
+	int xCoor = localPt.x;
+	int yCoor = localPt.y;
+
+	//dependant on initialized coordiante ^
+	int xMouseCoor = xCoor;
+	int yMouseCoor = yCoor;
+
+	int screenWidth = getScreenWidth();
+	int screenHeight = getScreenHeight();
+
+	BOOLEAN caseA = (yCoor + contextMenuHeight) > screenHeight; //exceed BOTTOM region only
+	BOOLEAN caseB = (xCoor + contextMenuWidth) > screenWidth; //exceed RIGHT region only
+	BOOLEAN caseC = (caseA) && (caseB); //exceed BOTTOM RIGHT region
+	BOOLEAN caseD = (xCoor - contextMenuWidth) < 0; //exceed LEFT region, 0 represents the very left x-coordinate of screen
+	BOOLEAN caseE = (yCoor - contextMenuHeight) < 0; //exceed TOP region
+	BOOLEAN caseF = (caseA) && (caseD); //exceed BOTTOM LEFT region
+	BOOLEAN caseG = (caseD) && (caseE); //exceed TOP LEFT region
+	BOOLEAN caseH = (caseB) && (caseE); //exceed TOP RIGHT region
+
+	//logic is used only to determine coordinates of cursor
+	//order of the cases and if statements IMPORTANT!
+	//else, it will be displayed wrongly
+	if (caseC) { //exceed BOTTOM RIGHT region
+		xCoor = (xCoor - contextMenuWidth) + 7;
+		yCoor = (yCoor - contextMenuHeight) + 7;
+		needMove = true;
+		casesLabel = L'c';
+	}
+	else if (caseF) { //exceed BOTTOM LEFT region
+		xCoor = (xCoor - 7);
+		yCoor = (yCoor - contextMenuHeight) + 7;
+		needMove = true;
+		casesLabel = L'f';
+	}
+	else if (caseG) { //exceed TOP LEFT region
+		xCoor = (xCoor - 7);
+		//yCoor = yCoor;
+		needMove = true;
+		casesLabel = L'g';
+	}
+	else if (caseH) { //exceed TOP RIGHT region
+		xCoor = (xCoor - contextMenuWidth) + 7;
+		//yCoor = yCoor;
+		needMove = true;
+		casesLabel = L'h';
+	}
+	else if (caseA) { //exceed BOTTOM region only
+		//xCoor = (mainPt.x - 7);
+		xCoor = (xCoor - (contextMenuWidth / 2));
+		yCoor = (yCoor - contextMenuHeight) + 7;
+		needMove = true;
+		casesLabel = L'a';
+	}
+	else if (caseB) { //exceed RIGHT region only
+		xCoor = (xCoor - contextMenuWidth) + 7;
+		yCoor = (yCoor - (contextMenuWidth / 2));
+		needMove = true;
+		casesLabel = L'b';
+	}
+	else if (caseD) { //exceed LEFT region
+		xCoor = (xCoor - 7);
+		yCoor = (yCoor - (contextMenuWidth / 2));
+		needMove = true;
+		casesLabel = L'd';
+	}
+	else if (caseE) { //exceed TOP region
+		xCoor = (xCoor - (contextMenuWidth / 2));
+		//yCoor = yCoor;
+		needMove = true;
+		casesLabel = L'e';
+	}
+	else { //set coordinate at MIDDLE, if not exceed screen
+		xCoor = (xCoor - (contextMenuWidth / 2));
+		yCoor = (yCoor - (contextMenuWidth / 2));
+		needMove = false;
+		casesLabel = L'm';
+	}
+	//------------until here-----------------
+
 	try {
 		//Platform::DebugPrintf("S M:%x WP:%x L:%x\n", iMessage, wParam, lParam);
 		iMessage = SciMessageFromEM(iMessage);
 		switch (iMessage) {
 
 		case WM_CREATE:
+			//OutputDebugStringA("------I AM BEING CREATED------\n");
 			ctrlID = ::GetDlgCtrlID(HwndFromWindow(wMain));
 			// Get Intellimouse scroll line parameters
 			GetIntelliMouseParameters();
 			::RegisterDragDrop(MainHWND(), reinterpret_cast<IDropTarget *>(&dt));
+
+			//my part
+			//register context menu window class
+			MyRegisterClass(hInstance); //this one not sure working or not, 'cuz the argument used is from Notepad itself
+
 			break;
 
 		case WM_COMMAND:
@@ -1938,7 +2203,27 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:
-		case WM_RBUTTONDOWN:
+		case WM_RBUTTONDOWN: {
+			//the part for creating the context menu shouldn't be here
+			//should be in nppbigswitch.cpp instead
+			//this file supposed to only be used to register the window
+			// 
+			//my part
+			//int ctrlKey = GetKeyState(VK_CONTROL);
+			//int rMBtn = GetAsyncKeyState(VK_RBUTTON);
+
+			//create custom menu window when right click
+			//cstmHwnd = CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, xCoor, yCoor, contextMenuWidth, contextMenuHeight, MainHWND(), nullptr, nullptr, nullptr);
+
+			//if (((ctrlKey & 0x8000)) && rMBtn) { //if ctrl key + right click down
+			//	OutputDebugString(L"Custom Context Menu Opens...123\n");
+			//	MessageBoxA(nullptr, "Custom Context Menu Opens...123", ":D", MB_OK);
+			//	//create custom menu window when right click
+			//	//cstmHwnd = CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, xCoor, yCoor, contextMenuWidth, contextMenuHeight, MainHWND(), nullptr, nullptr, nullptr);
+
+			//}
+			//break;
+		}
 		case WM_MOUSEMOVE:
 		case WM_MOUSELEAVE:
 		case WM_MOUSEWHEEL:
@@ -3602,4 +3887,242 @@ int ResourcesRelease(bool fromDllMain) noexcept {
 // This function is externally visible so it can be called from container when building statically.
 int Scintilla_ReleaseResources() {
 	return Scintilla::ResourcesRelease(false);
+}
+
+//this is my part
+//method to register window class
+ATOM MyRegisterClass(HINSTANCE hInstance)
+{
+	WNDCLASSEX child;
+
+	//register class for context menu window
+	child.cbSize = sizeof(WNDCLASSEX);
+
+	//CS_DROPSHADOW related to SystemParametersInfoA - to change drop shadow effect
+	child.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS | CS_DROPSHADOW;
+	child.lpfnWndProc = CustomContextMenuProc;
+	child.cbClsExtra = 0;
+	child.cbWndExtra = 0;
+	child.hInstance = hInstance;
+	child.hIcon = NULL;
+	child.hCursor = LoadCursor(NULL, IDC_ARROW);
+	child.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	child.lpszMenuName = NULL;
+	child.lpszClassName = _T("ContextMenuWindow");
+	child.hIconSm = NULL;
+
+	//param for method below
+	//(what action to do, not used, set value of the action from first param, no need to send notify message to successor parent windows)
+	SystemParametersInfoA(SPI_SETDROPSHADOW, 0, (PVOID)FALSE, 0);
+
+	RegisterClassEx(&child);
+
+	return RegisterClassEx(&child);
+}
+
+//this one is childwinproc
+//used for windows
+LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	int wmId, wmEvent;
+	PAINTSTRUCT ps;
+	HDC hdc;
+	HDC hdcStatic;
+	RECT rc;
+
+	HBRUSH hbrWhite, hbrGray; //brushes for painting
+
+	//hChild = hWnd; //window handler for context menu
+
+	const int textCtrlSize = 4;
+	HWND textCtrl[textCtrlSize]; //array for text controls
+
+	//used by edit control
+	int xCoorI = 20;
+	int yCoorI = 25;
+	int textWidth = 190;
+	int textHeight = 50;
+
+	//HBRUSH hbrBkgnd;// = CreateSolidBrush(RGB(255, 255, 255));
+
+	HFONT hFont;
+
+	//mouse position
+	POINT mousePt;
+	mousePt.x = GET_X_LPARAM(lParam);
+	mousePt.y = GET_Y_LPARAM(lParam);
+
+	//just before switch print message here
+	//here
+
+	switch (message)
+	{
+	case WM_CTLCOLORSTATIC:
+	{
+		return SendMessage(reinterpret_cast<HWND>(lParam), APP_CTLCOLORSTATIC, wParam, 0);
+	}
+
+	case WM_KILLFOCUS:
+		DestroyWindow(hWnd); //destroy context menu when lose focus
+		break;
+
+	case WM_MOUSEMOVE: {
+		break;
+	}
+
+	case WM_MOUSEHOVER: {
+		OutputDebugString(L"Context Menu is being hovered...\n");
+		//MessageBox(nullptr, L"Testing", L"Testing", MB_OK);
+
+		break;
+	}
+
+	case WM_CONTEXTMENU: {
+		ctrlKey = GetKeyState(VK_CONTROL);
+		rMBtn = GetAsyncKeyState(VK_RBUTTON);
+
+		if ((ctrlKey & 0x8000)) {
+			OutputDebugString(L"AAAA ctrlKey down!\n");
+		}
+		if (rMBtn) {
+			//MessageBox(nullptr, L"rMBtn down!", L":D", MB_OK);
+			OutputDebugString(L"BBBB rMBtn down!\n");
+		}
+		if (((ctrlKey & 0x8000)) && rMBtn) {
+			OutputDebugString(L"both were down YASSS!\n");
+		}
+		else {
+			//MessageBox(nullptr, L"Nothing was down!", L":(", MB_OK);
+			OutputDebugString(L"XXXX Nothing was down!\n");
+		}
+		break;
+	}
+
+					   //case WM_LBUTTONDOWN: {
+					   //	rMBtn = GetKeyState(VK_RBUTTON);
+
+					   //	if ((rMBtn & 0x8000) != 0) {
+					   //		//MessageBox(nullptr, L"rMBtn down!", L":D", MB_OK);
+					   //		OutputDebugString(L"BBBB rMBtn down!\n");
+					   //	}
+					   //	else {
+					   //		OutputDebugString(L"xxxxxxlaaaaaaaaaa!\n");
+					   //	}
+
+					   //	break;
+					   //}
+
+					   /*case WM_RBUTTONUP: {
+						   if (wParam & MK_CONTROL) {
+							   MessageBox(nullptr, L"AIKAIKAIK?!", L":D", MB_OK);
+						   }
+						   else {
+							   MessageBox(nullptr, L"nope :(", L":D", MB_OK);
+						   }
+
+						   break;
+					   }*/
+
+	case WM_CREATE: //put all sorts of stuff when the context menu is called
+	{
+		//x & y positions from context client screen
+		int txtXPos = 10;
+		int txtYPos = 0;
+
+		int borderWidth = 120;
+		int borderHeight = 20;
+
+		//font to be set to
+		hFont = CreateFont(17, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Segoe UI"));
+
+		textCtrl[0] = CreateWindow(L"STATIC", L"This is text A.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, txtYPos, borderWidth, borderHeight, hWnd, (HMENU)FIRST_TEXT_ID, nullptr, nullptr);
+		textCtrl[1] = CreateWindow(L"STATIC", L"This is text B.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, (txtYPos + 50), borderWidth, borderHeight, hWnd, (HMENU)SECOND_TEXT_ID, nullptr, nullptr);
+		textCtrl[2] = CreateWindow(L"STATIC", L"This is text C.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos + 140), txtYPos, borderWidth, borderHeight, hWnd, (HMENU)THIRD_TEXT_ID, nullptr, nullptr);
+		textCtrl[3] = CreateWindow(L"STATIC", L"This is text D.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos + 140), (txtYPos + 50), borderWidth, borderHeight, hWnd, (HMENU)FOURTH_TEXT_ID, nullptr, nullptr);
+
+		//set static color when creating window
+		bkgndColor = GetSysColor(COLOR_MENU);
+		txtColor = GetSysColor(COLOR_MENUTEXT);
+
+		//set font of the textCtrl
+		//doesnt work if handler target = hChild
+		for (int i = 0; i < textCtrlSize; i++) {
+			SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
+			SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
+		}
+
+		/*txtHwnd = CreateWindow(L"Static", L"Hello World!", WS_VISIBLE | WS_CHILD | SS_NOTIFY, 100, 100, 120, 30, hChild, (HMENU)testingTxtID, nullptr, nullptr);
+		SendMessage(txtHwnd, WM_SETFONT, (WPARAM)hFont, TRUE);
+		SetWindowSubclass(txtHwnd, OwnerTxtProc, 0, 0);*/
+
+		break;
+	}
+
+	case WM_COMMAND:
+	{
+		wmId = LOWORD(wParam);
+		wmEvent = HIWORD(wParam);
+
+		//to test case for wparam
+		switch (wmId) {
+		case FIRST_TEXT_ID:
+			DestroyWindow(hWnd);
+			MessageBox(nullptr, L" First text control clicked!", L"Alert", MB_OK | MB_ICONINFORMATION);
+			break;
+		case SECOND_TEXT_ID:
+			DestroyWindow(hWnd);
+			MessageBox(nullptr, L" Second text control clicked!", L"Alert", MB_OK | MB_ICONINFORMATION);
+			break;
+		case THIRD_TEXT_ID:
+			DestroyWindow(hWnd);
+			MessageBox(nullptr, L" Third text control clicked!", L"Alert", MB_OK | MB_ICONINFORMATION);
+			break;
+		case FOURTH_TEXT_ID:
+			DestroyWindow(hWnd);
+			MessageBox(nullptr, L" Fourth text control clicked!", L"Alert", MB_OK | MB_ICONINFORMATION);
+			break;
+
+			//for testing only
+		case testingTxtID:
+			//DestroyWindow(hChild);
+			MessageBox(nullptr, L" Hello World!", L":D", MB_OK | MB_ICONINFORMATION);
+			break;
+		}
+
+		break;
+	}
+
+	case WM_PAINT:
+		hdc = BeginPaint(hWnd, &ps);
+		break;
+
+	case WM_DESTROY:
+		DestroyWindow(hWnd);
+		break;
+
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+	return 0;
+}
+
+//newer get coordinate
+POINT getCursorPoint() {
+	POINT thePt;
+	GetCursorPos(&thePt);
+	return thePt;
+}
+
+int getScreenWidth() {
+	HDC theHDC = GetDC(0); //info of screen
+	int screenWidth = GetDeviceCaps(theHDC, HORZRES);
+	ReleaseDC(0, theHDC);
+	return screenWidth;
+}
+
+int getScreenHeight() {
+	HDC theHDC = GetDC(0); //info of screen
+	int screenHeight = GetDeviceCaps(theHDC, VERTRES);
+	ReleaseDC(0, theHDC);
+	return screenHeight;
 }

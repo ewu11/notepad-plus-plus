@@ -34,6 +34,9 @@ using namespace std;
 
 #define WM_DPICHANGED 0x02E0
 
+//this is my part
+
+
 
 struct SortTaskListPred final
 {
@@ -1590,6 +1593,9 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		case WM_CONTEXTMENU:
 		{
+			//mine
+			//int ctrlKey, rMBtn;
+
 			if (nppParam._isTaskListRBUTTONUP_Active)
 			{
 				nppParam._isTaskListRBUTTONUP_Active = false;
@@ -1603,6 +1609,8 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					else
 						switchEditViewTo(SUB_VIEW);
 
+					//default codes
+					/*OutputDebugString(L"Default Context Menu Opens...\n");
 					POINT p;
 					::GetCursorPos(&p);
 					ContextMenu scintillaContextmenu;
@@ -1610,7 +1618,34 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					bool copyLink = (_pEditView->getSelectedTextCount() == 0) && _pEditView->getIndicatorRange(URL_INDIC);
 					scintillaContextmenu.create(hwnd, tmp, _mainMenuHandle, copyLink);
 					scintillaContextmenu.display(p);
-					return TRUE;
+					return TRUE;*/
+
+					////my part
+					int ctrlKey = GetKeyState(VK_CONTROL);
+					int rMBtn = GetAsyncKeyState(VK_RBUTTON);
+
+					if (((ctrlKey & 0x8000)) && rMBtn) { //if ctrl key + right click down
+						OutputDebugString(L"Custom Context Menu Opens...\n");
+						//MessageBoxA(nullptr, "Custom Context Menu Opens...", ":D", MB_OK);
+						//create custom menu window when right click
+						//cstmHwnd = CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, xCoor, yCoor, contextMenuWidth, contextMenuHeight, MainHWND(), nullptr, nullptr, nullptr);
+						//cstmHwnd = CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, xCoor, yCoor, contextMenuWidth, contextMenuHeight, MainHWND(), nullptr, nullptr, nullptr);
+						CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, 100, 100, 500, 500, hwnd, nullptr, nullptr, nullptr);
+						return TRUE;
+
+					}
+					else {
+						//MessageBox(nullptr, L"Nothing was down!", L":(", MB_OK);
+						OutputDebugString(L"Default Context Menu Opens...\n");
+						POINT p;
+						::GetCursorPos(&p);
+						ContextMenu scintillaContextmenu;
+						std::vector<MenuItemUnit>& tmp = nppParam.getContextMenuItems();
+						bool copyLink = (_pEditView->getSelectedTextCount() == 0) && _pEditView->getIndicatorRange(URL_INDIC);
+						scintillaContextmenu.create(hwnd, tmp, _mainMenuHandle, copyLink);
+						scintillaContextmenu.display(p);
+						return TRUE;
+					}
 				}
 			}
 
