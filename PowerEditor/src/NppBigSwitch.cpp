@@ -34,9 +34,17 @@ using namespace std;
 
 #define WM_DPICHANGED 0x02E0
 
-//this is my part
+//------this is my part-----------
 
+const POINT getCursorPoint();
+const int getScreenWidth();
+const int getScreenHeight();
 
+//context menu window size
+const int contextMenuHeight = 300;
+const int contextMenuWidth = 300;
+
+//------until here-------------
 
 struct SortTaskListPred final
 {
@@ -1593,8 +1601,95 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		case WM_CONTEXTMENU:
 		{
-			//mine
-			//int ctrlKey, rMBtn;
+			//-------------mine-----------------
+			//variables for my context menu
+			//flag to move cursor or not
+			BOOLEAN needMove = false; //false, no need by default
+			//flag for move cases
+			wchar_t casesLabel;
+
+			POINT localPt = getCursorPoint();
+
+			int xCoor = localPt.x;
+			int yCoor = localPt.y;
+
+			//dependant on initialized coordiante ^
+			int xMouseCoor = xCoor;
+			int yMouseCoor = yCoor;
+
+			int screenWidth = getScreenWidth();
+			int screenHeight = getScreenHeight();
+
+			BOOLEAN caseA = (yCoor + contextMenuHeight) > screenHeight; //exceed BOTTOM region only
+			BOOLEAN caseB = (xCoor + contextMenuWidth) > screenWidth; //exceed RIGHT region only
+			BOOLEAN caseC = (caseA) && (caseB); //exceed BOTTOM RIGHT region
+			BOOLEAN caseD = (xCoor - contextMenuWidth) < 0; //exceed LEFT region, 0 represents the very left x-coordinate of screen
+			BOOLEAN caseE = (yCoor - contextMenuHeight) < 0; //exceed TOP region
+			BOOLEAN caseF = (caseA) && (caseD); //exceed BOTTOM LEFT region
+			BOOLEAN caseG = (caseD) && (caseE); //exceed TOP LEFT region
+			BOOLEAN caseH = (caseB) && (caseE); //exceed TOP RIGHT region
+
+			HFONT hFont; //for the font
+
+			//logic is used only to determine coordinates of cursor
+			//order of the cases and if statements IMPORTANT!
+			//else, it will be displayed wrongly
+			if (caseC) { //exceed BOTTOM RIGHT region
+				xCoor = (xCoor - contextMenuWidth) + 7;
+				yCoor = (yCoor - contextMenuHeight) + 7;
+				needMove = true;
+				casesLabel = L'c';
+			}
+			else if (caseF) { //exceed BOTTOM LEFT region
+				xCoor = (xCoor - 7);
+				yCoor = (yCoor - contextMenuHeight) + 7;
+				needMove = true;
+				casesLabel = L'f';
+			}
+			else if (caseG) { //exceed TOP LEFT region
+				xCoor = (xCoor - 7);
+				//yCoor = yCoor;
+				needMove = true;
+				casesLabel = L'g';
+			}
+			else if (caseH) { //exceed TOP RIGHT region
+				xCoor = (xCoor - contextMenuWidth) + 7;
+				//yCoor = yCoor;
+				needMove = true;
+				casesLabel = L'h';
+			}
+			else if (caseA) { //exceed BOTTOM region only
+				//xCoor = (mainPt.x - 7);
+				xCoor = (xCoor - (contextMenuWidth / 2));
+				yCoor = (yCoor - contextMenuHeight) + 7;
+				needMove = true;
+				casesLabel = L'a';
+			}
+			else if (caseB) { //exceed RIGHT region only
+				xCoor = (xCoor - contextMenuWidth) + 7;
+				yCoor = (yCoor - (contextMenuWidth / 2));
+				needMove = true;
+				casesLabel = L'b';
+			}
+			else if (caseD) { //exceed LEFT region
+				xCoor = (xCoor - 7);
+				yCoor = (yCoor - (contextMenuWidth / 2));
+				needMove = true;
+				casesLabel = L'd';
+			}
+			else if (caseE) { //exceed TOP region
+				xCoor = (xCoor - (contextMenuWidth / 2));
+				//yCoor = yCoor;
+				needMove = true;
+				casesLabel = L'e';
+			}
+			else { //set coordinate at MIDDLE, if not exceed screen
+				xCoor = (xCoor - (contextMenuWidth / 2));
+				yCoor = (yCoor - (contextMenuWidth / 2));
+				needMove = false;
+				casesLabel = L'm';
+			}
+			//------------until here-----------------
 
 			if (nppParam._isTaskListRBUTTONUP_Active)
 			{
@@ -1625,14 +1720,60 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					int rMBtn = GetAsyncKeyState(VK_RBUTTON);
 
 					if (((ctrlKey & 0x8000)) && rMBtn) { //if ctrl key + right click down
+
+						//check cursor move flag
+						if (needMove) {
+							if (casesLabel == 'a') { //bottom region
+								xMouseCoor = localPt.x; //must use localPt else, cursor set at windows edge
+								yMouseCoor = yMouseCoor - (contextMenuHeight / 2);
+							}
+							else if (casesLabel == 'b') { //right region
+								xMouseCoor = xMouseCoor - (contextMenuWidth / 2);
+								yMouseCoor = localPt.y;
+							}
+							else if (casesLabel == 'c') { // bottom right region
+								xMouseCoor = xMouseCoor - (contextMenuWidth / 2);
+								yMouseCoor = yMouseCoor - (contextMenuHeight / 2);
+							}
+							else if (casesLabel == 'd') { // left region
+								xMouseCoor = xMouseCoor + (contextMenuWidth / 2);
+								yMouseCoor = localPt.y;
+							}
+							else if (casesLabel == 'e') { // top region
+								xMouseCoor = localPt.x;
+								yMouseCoor = yMouseCoor + (contextMenuHeight / 2);
+							}
+							else if (casesLabel == 'f') { //bottom left
+								xMouseCoor = xMouseCoor + (contextMenuWidth / 2);
+								yMouseCoor = yMouseCoor - (contextMenuHeight / 2);
+							}
+							else if (casesLabel == 'g') { //top left
+								xMouseCoor = xMouseCoor + (contextMenuWidth / 2);
+								yMouseCoor = yMouseCoor + (contextMenuHeight / 2);
+							}
+							else if (casesLabel == 'h') { //top right
+								xMouseCoor = xMouseCoor - (contextMenuWidth / 2);
+								yMouseCoor = yMouseCoor + (contextMenuHeight / 2);
+							}
+							//else, no need change, skipped at needMove == false
+						}
+
+						//set new cursor coordinate base on cases above
+						SetCursorPos(xMouseCoor, yMouseCoor);
+
+						//to change the font
+						hFont = CreateFont(17, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Segoe UI"));
+
+
 						OutputDebugString(L"Custom Context Menu Opens...\n");
 						//MessageBoxA(nullptr, "Custom Context Menu Opens...", ":D", MB_OK);
 						//create custom menu window when right click
-						//cstmHwnd = CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, xCoor, yCoor, contextMenuWidth, contextMenuHeight, MainHWND(), nullptr, nullptr, nullptr);
-						//cstmHwnd = CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, xCoor, yCoor, contextMenuWidth, contextMenuHeight, MainHWND(), nullptr, nullptr, nullptr);
-						CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, 100, 100, 500, 500, hwnd, nullptr, nullptr, nullptr);
-						return TRUE;
+						
+						HWND myContextMenu = CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, xCoor, yCoor, contextMenuWidth, contextMenuHeight, hwnd, nullptr, nullptr, nullptr);
+						SendMessage(myContextMenu, WM_SETFONT, (WPARAM)hFont, TRUE); //to enable set of change of font
 
+						//CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, 100, 100, 500, 500, hwnd, nullptr, nullptr, nullptr);
+						return TRUE;
 					}
 					else {
 						//MessageBox(nullptr, L"Nothing was down!", L":(", MB_OK);
@@ -2782,4 +2923,26 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 	_pluginsManager.relayNppMessages(message, wParam, lParam);
 	return result;
+}
+
+//---------mine-----------------
+//newer get coordinate
+const POINT getCursorPoint() {
+	POINT thePt;
+	GetCursorPos(&thePt);
+	return thePt;
+}
+
+const int getScreenWidth() {
+	HDC theHDC = GetDC(0); //info of screen
+	int screenWidth = GetDeviceCaps(theHDC, HORZRES);
+	ReleaseDC(0, theHDC);
+	return screenWidth;
+}
+
+const int getScreenHeight() {
+	HDC theHDC = GetDC(0); //info of screen
+	int screenHeight = GetDeviceCaps(theHDC, VERTRES);
+	ReleaseDC(0, theHDC);
+	return screenHeight;
 }

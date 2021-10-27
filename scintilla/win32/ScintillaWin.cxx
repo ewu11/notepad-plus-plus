@@ -172,7 +172,6 @@ HWND cstmHwnd;
 int ctrlKey, rMBtn; //for control key detection
 COLORREF bkgndColor; //= GetSysColor(COLOR_MENUTEXT); // set to default
 COLORREF txtColor; //= GetSysColor(COLOR_MENU); // set to default
-//bool bMouseTracking = false; //sik kui jam nanun anih
 HBRUSH hbrBkgnd = nullptr;
 const UINT APP_CTLCOLORSTATIC = WM_APP + 1; //i guess this is to create a custom message
 
@@ -2055,90 +2054,91 @@ sptr_t ScintillaWin::SciMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	//variables for my context menu
 	//flag to move cursor or not
-	BOOLEAN needMove = false; //false, no need by default
-	//flag for move cases
-	wchar_t casesLabel;
+	//BOOLEAN needMove = false; //false, no need by default
+	////flag for move cases
+	//wchar_t casesLabel;
 
-	POINT localPt = getCursorPoint();
+	//POINT localPt = getCursorPoint();
 
-	int xCoor = localPt.x;
-	int yCoor = localPt.y;
+	//int xCoor = localPt.x;
+	//int yCoor = localPt.y;
 
-	//dependant on initialized coordiante ^
-	int xMouseCoor = xCoor;
-	int yMouseCoor = yCoor;
+	////dependant on initialized coordiante ^
+	//int xMouseCoor = xCoor;
+	//int yMouseCoor = yCoor;
 
-	int screenWidth = getScreenWidth();
-	int screenHeight = getScreenHeight();
+	//int screenWidth = getScreenWidth();
+	//int screenHeight = getScreenHeight();
 
-	BOOLEAN caseA = (yCoor + contextMenuHeight) > screenHeight; //exceed BOTTOM region only
-	BOOLEAN caseB = (xCoor + contextMenuWidth) > screenWidth; //exceed RIGHT region only
-	BOOLEAN caseC = (caseA) && (caseB); //exceed BOTTOM RIGHT region
-	BOOLEAN caseD = (xCoor - contextMenuWidth) < 0; //exceed LEFT region, 0 represents the very left x-coordinate of screen
-	BOOLEAN caseE = (yCoor - contextMenuHeight) < 0; //exceed TOP region
-	BOOLEAN caseF = (caseA) && (caseD); //exceed BOTTOM LEFT region
-	BOOLEAN caseG = (caseD) && (caseE); //exceed TOP LEFT region
-	BOOLEAN caseH = (caseB) && (caseE); //exceed TOP RIGHT region
+	//BOOLEAN caseA = (yCoor + contextMenuHeight) > screenHeight; //exceed BOTTOM region only
+	//BOOLEAN caseB = (xCoor + contextMenuWidth) > screenWidth; //exceed RIGHT region only
+	//BOOLEAN caseC = (caseA) && (caseB); //exceed BOTTOM RIGHT region
+	//BOOLEAN caseD = (xCoor - contextMenuWidth) < 0; //exceed LEFT region, 0 represents the very left x-coordinate of screen
+	//BOOLEAN caseE = (yCoor - contextMenuHeight) < 0; //exceed TOP region
+	//BOOLEAN caseF = (caseA) && (caseD); //exceed BOTTOM LEFT region
+	//BOOLEAN caseG = (caseD) && (caseE); //exceed TOP LEFT region
+	//BOOLEAN caseH = (caseB) && (caseE); //exceed TOP RIGHT region
 
-	//logic is used only to determine coordinates of cursor
-	//order of the cases and if statements IMPORTANT!
-	//else, it will be displayed wrongly
-	if (caseC) { //exceed BOTTOM RIGHT region
-		xCoor = (xCoor - contextMenuWidth) + 7;
-		yCoor = (yCoor - contextMenuHeight) + 7;
-		needMove = true;
-		casesLabel = L'c';
-	}
-	else if (caseF) { //exceed BOTTOM LEFT region
-		xCoor = (xCoor - 7);
-		yCoor = (yCoor - contextMenuHeight) + 7;
-		needMove = true;
-		casesLabel = L'f';
-	}
-	else if (caseG) { //exceed TOP LEFT region
-		xCoor = (xCoor - 7);
-		//yCoor = yCoor;
-		needMove = true;
-		casesLabel = L'g';
-	}
-	else if (caseH) { //exceed TOP RIGHT region
-		xCoor = (xCoor - contextMenuWidth) + 7;
-		//yCoor = yCoor;
-		needMove = true;
-		casesLabel = L'h';
-	}
-	else if (caseA) { //exceed BOTTOM region only
-		//xCoor = (mainPt.x - 7);
-		xCoor = (xCoor - (contextMenuWidth / 2));
-		yCoor = (yCoor - contextMenuHeight) + 7;
-		needMove = true;
-		casesLabel = L'a';
-	}
-	else if (caseB) { //exceed RIGHT region only
-		xCoor = (xCoor - contextMenuWidth) + 7;
-		yCoor = (yCoor - (contextMenuWidth / 2));
-		needMove = true;
-		casesLabel = L'b';
-	}
-	else if (caseD) { //exceed LEFT region
-		xCoor = (xCoor - 7);
-		yCoor = (yCoor - (contextMenuWidth / 2));
-		needMove = true;
-		casesLabel = L'd';
-	}
-	else if (caseE) { //exceed TOP region
-		xCoor = (xCoor - (contextMenuWidth / 2));
-		//yCoor = yCoor;
-		needMove = true;
-		casesLabel = L'e';
-	}
-	else { //set coordinate at MIDDLE, if not exceed screen
-		xCoor = (xCoor - (contextMenuWidth / 2));
-		yCoor = (yCoor - (contextMenuWidth / 2));
-		needMove = false;
-		casesLabel = L'm';
-	}
-	//------------until here-----------------
+	////logic is used only to determine coordinates of cursor
+	////order of the cases and if statements IMPORTANT!
+	////else, it will be displayed wrongly
+	//if (caseC) { //exceed BOTTOM RIGHT region
+	//	xCoor = (xCoor - contextMenuWidth) + 7;
+	//	yCoor = (yCoor - contextMenuHeight) + 7;
+	//	needMove = true;
+	//	casesLabel = L'c';
+	//}
+	//else if (caseF) { //exceed BOTTOM LEFT region
+	//	xCoor = (xCoor - 7);
+	//	yCoor = (yCoor - contextMenuHeight) + 7;
+	//	needMove = true;
+	//	casesLabel = L'f';
+	//}
+	//else if (caseG) { //exceed TOP LEFT region
+	//	xCoor = (xCoor - 7);
+	//	//yCoor = yCoor;
+	//	needMove = true;
+	//	casesLabel = L'g';
+	//}
+	//else if (caseH) { //exceed TOP RIGHT region
+	//	xCoor = (xCoor - contextMenuWidth) + 7;
+	//	//yCoor = yCoor;
+	//	needMove = true;
+	//	casesLabel = L'h';
+	//}
+	//else if (caseA) { //exceed BOTTOM region only
+	//	//xCoor = (mainPt.x - 7);
+	//	xCoor = (xCoor - (contextMenuWidth / 2));
+	//	yCoor = (yCoor - contextMenuHeight) + 7;
+	//	needMove = true;
+	//	casesLabel = L'a';
+	//}
+	//else if (caseB) { //exceed RIGHT region only
+	//	xCoor = (xCoor - contextMenuWidth) + 7;
+	//	yCoor = (yCoor - (contextMenuWidth / 2));
+	//	needMove = true;
+	//	casesLabel = L'b';
+	//}
+	//else if (caseD) { //exceed LEFT region
+	//	xCoor = (xCoor - 7);
+	//	yCoor = (yCoor - (contextMenuWidth / 2));
+	//	needMove = true;
+	//	casesLabel = L'd';
+	//}
+	//else if (caseE) { //exceed TOP region
+	//	xCoor = (xCoor - (contextMenuWidth / 2));
+	//	//yCoor = yCoor;
+	//	needMove = true;
+	//	casesLabel = L'e';
+	//}
+	//else { //set coordinate at MIDDLE, if not exceed screen
+	//	xCoor = (xCoor - (contextMenuWidth / 2));
+	//	yCoor = (yCoor - (contextMenuWidth / 2));
+	//	needMove = false;
+	//	casesLabel = L'm';
+	//}
+	////------------until here-----------------
+
 
 	try {
 		//Platform::DebugPrintf("S M:%x WP:%x L:%x\n", iMessage, wParam, lParam);
@@ -2154,7 +2154,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 			//my part
 			//register context menu window class
-			MyRegisterClass(hInstance); //this one not sure working or not, 'cuz the argument used is from Notepad itself
+			MyRegisterClass(hInstance);
 
 			break;
 
@@ -4092,7 +4092,7 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 	return 0;
 }
 
-//newer get coordinate
+////newer get coordinate
 POINT getCursorPoint() {
 	POINT thePt;
 	GetCursorPos(&thePt);
