@@ -2208,21 +2208,6 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			//should be in nppbigswitch.cpp instead
 			//this file supposed to only be used to register the window
 			// 
-			//my part
-			//int ctrlKey = GetKeyState(VK_CONTROL);
-			//int rMBtn = GetAsyncKeyState(VK_RBUTTON);
-
-			//create custom menu window when right click
-			//cstmHwnd = CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, xCoor, yCoor, contextMenuWidth, contextMenuHeight, MainHWND(), nullptr, nullptr, nullptr);
-
-			//if (((ctrlKey & 0x8000)) && rMBtn) { //if ctrl key + right click down
-			//	OutputDebugString(L"Custom Context Menu Opens...123\n");
-			//	MessageBoxA(nullptr, "Custom Context Menu Opens...123", ":D", MB_OK);
-			//	//create custom menu window when right click
-			//	//cstmHwnd = CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, xCoor, yCoor, contextMenuWidth, contextMenuHeight, MainHWND(), nullptr, nullptr, nullptr);
-
-			//}
-			//break;
 		}
 		case WM_MOUSEMOVE:
 		case WM_MOUSELEAVE:
@@ -3891,6 +3876,7 @@ int Scintilla_ReleaseResources() {
 
 //this is my part
 //method to register window class
+//registered at line 2157
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
 	WNDCLASSEX child;
