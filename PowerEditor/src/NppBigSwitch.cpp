@@ -1629,7 +1629,7 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			BOOLEAN caseG = (caseD) && (caseE); //exceed TOP LEFT region
 			BOOLEAN caseH = (caseB) && (caseE); //exceed TOP RIGHT region
 
-			HFONT hFont; //for the font
+			//HFONT hFont; //for the font, doesnt work 'cuz got npp got higher priority
 
 			//logic is used only to determine coordinates of cursor
 			//order of the cases and if statements IMPORTANT!
@@ -1762,17 +1762,22 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 						SetCursorPos(xMouseCoor, yMouseCoor);
 
 						//to change the font
-						hFont = CreateFont(17, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Segoe UI"));
-
+						//hFont = CreateFont(17, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Segoe UI"));
 
 						OutputDebugString(L"Custom Context Menu Opens...\n");
 						//MessageBoxA(nullptr, "Custom Context Menu Opens...", ":D", MB_OK);
 						//create custom menu window when right click
 						
 						HWND myContextMenu = CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, xCoor, yCoor, contextMenuWidth, contextMenuHeight, hwnd, nullptr, nullptr, nullptr);
-						SendMessage(myContextMenu, WM_SETFONT, (WPARAM)hFont, TRUE); //to enable set of change of font
+						UNREFERENCED_PARAMETER(myContextMenu);
+						//SendMessage(myContextMenu, WM_SETFONT, (WPARAM)hFont, TRUE); //to enable set of change of font
 
-						//CreateWindow(_T("ContextMenuWindow"), _T(""), WS_VISIBLE | WS_POPUP | WS_BORDER, 100, 100, 500, 500, hwnd, nullptr, nullptr, nullptr);
+						//i want to print the vector containing context menu items
+						/*std::vector<MenuItemUnit>& tmp = nppParam.getContextMenuItems();
+						for (int i = 0; i < tmp.size(); i++) {
+							OutputDebugString(tmp.at(i));
+						}*/
+
 						return TRUE;
 					}
 					else {

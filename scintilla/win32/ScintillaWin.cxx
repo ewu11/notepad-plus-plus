@@ -14,6 +14,8 @@
 #include <cmath>
 #include <climits>
 
+
+
 #include <stdexcept>
 #include <new>
 #include <string>
@@ -91,6 +93,8 @@
 #include "HanjaDic.h"
 #include "ScintillaWin.h"
 #include "BoostRegexSearch.h"
+
+
 
 #ifndef SPI_GETWHEELSCROLLLINES
 #define SPI_GETWHEELSCROLLLINES   104
@@ -3920,7 +3924,7 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 
 	//hChild = hWnd; //window handler for context menu
 
-	const int textCtrlSize = 4;
+	const int textCtrlSize = 15;
 	HWND textCtrl[textCtrlSize]; //array for text controls
 
 	//used by edit control
@@ -4018,13 +4022,65 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 		int borderWidth = 120;
 		int borderHeight = 20;
 
+		//this is for the positioning
+		int horiGap = 10;
+		int vertGap = 10;
+
+		//static int heightCount = vertGap + borderHeight; //this is the initial height count
+		static int heightCountFirstCol = vertGap + borderHeight; //this is the initial height count
+		static int heightCountSecondCol = vertGap + borderHeight; //this is the initial height count
+		int increaseGapBy = 10 + vertGap + borderHeight;
+
+		static int count = 0;
+		bool isEven = (2%2==0);
+		bool isOdd = !isEven;
+
+		//mapping of menu item name
+		std::map<int, LPCWSTR> menuItemNameMap;
+		//equivalent -> menuItemNameMap.insert ( std::pair<int, LPCSTR>(0, "Cut") );
+		menuItemNameMap[0] = L"Cut";
+		menuItemNameMap[1] = L"Delete";
+		menuItemNameMap[2] = L"Copy";
+		menuItemNameMap[3] = L"Select all";
+		menuItemNameMap[4] = L"Begin/ End select";
+		menuItemNameMap[5] = L"Style token";
+		menuItemNameMap[6] = L"Remove style";
+		menuItemNameMap[7] = L"UPPERCASE";
+		menuItemNameMap[8] = L"lowercase";
+		menuItemNameMap[9] = L"Open file";
+		menuItemNameMap[10] = L"Search on internet";
+		menuItemNameMap[11] = L"Toggle single line comment";
+		menuItemNameMap[12] = L"Block comment";
+		menuItemNameMap[13] = L"Hide lines";
+		menuItemNameMap[14] = L"Block uncomment";
+
 		//font to be set to
 		hFont = CreateFont(17, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Segoe UI"));
 
-		textCtrl[0] = CreateWindow(L"STATIC", L"This is text A.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, txtYPos, borderWidth, borderHeight, hWnd, (HMENU)FIRST_TEXT_ID, nullptr, nullptr);
+		/*textCtrl[0] = CreateWindow(L"STATIC", L"This is text A.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, txtYPos, borderWidth, borderHeight, hWnd, (HMENU)FIRST_TEXT_ID, nullptr, nullptr);
 		textCtrl[1] = CreateWindow(L"STATIC", L"This is text B.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, (txtYPos + 50), borderWidth, borderHeight, hWnd, (HMENU)SECOND_TEXT_ID, nullptr, nullptr);
 		textCtrl[2] = CreateWindow(L"STATIC", L"This is text C.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos + 140), txtYPos, borderWidth, borderHeight, hWnd, (HMENU)THIRD_TEXT_ID, nullptr, nullptr);
-		textCtrl[3] = CreateWindow(L"STATIC", L"This is text D.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos + 140), (txtYPos + 50), borderWidth, borderHeight, hWnd, (HMENU)FOURTH_TEXT_ID, nullptr, nullptr);
+		textCtrl[3] = CreateWindow(L"STATIC", L"This is text D.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos + 140), (txtYPos + 50), borderWidth, borderHeight, hWnd, (HMENU)FOURTH_TEXT_ID, nullptr, nullptr);*/
+
+
+		//mapping style + loop create context menu
+		for (int i = 0; i < menuItemNameMap.size(); i++) {
+			if ((count == 0) || (count == isOdd)) { //to make menu item go left side
+				txtXPos = 10;
+				txtYPos = heightCountFirstCol; // to make menu item stacky look
+				heightCountFirstCol += increaseGapBy;
+			}
+			else if (count == isEven) { //to make menu item go right side
+				txtXPos = (20 + borderWidth);
+				txtYPos = heightCountSecondCol; // to make menu item stacky look
+				heightCountSecondCol += increaseGapBy;
+			}
+			textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, txtYPos, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
+			SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
+			SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
+			count++;
+		}
+		
 
 		//set static color when creating window
 		bkgndColor = GetSysColor(COLOR_MENU);
@@ -4032,10 +4088,10 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 
 		//set font of the textCtrl
 		//doesnt work if handler target = hChild
-		for (int i = 0; i < textCtrlSize; i++) {
+		/*for (int i = 0; i < textCtrlSize; i++) {
 			SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
 			SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
-		}
+		}*/
 
 		/*txtHwnd = CreateWindow(L"Static", L"Hello World!", WS_VISIBLE | WS_CHILD | SS_NOTIFY, 100, 100, 120, 30, hChild, (HMENU)testingTxtID, nullptr, nullptr);
 		SendMessage(txtHwnd, WM_SETFONT, (WPARAM)hFont, TRUE);
