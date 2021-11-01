@@ -41,8 +41,8 @@ const int getScreenWidth();
 const int getScreenHeight();
 
 //context menu window size
-const int contextMenuHeight = 450;
-const int contextMenuWidth = 350;
+const int contextMenuHeight = 480;
+const int contextMenuWidth = 320;
 
 //------until here-------------
 

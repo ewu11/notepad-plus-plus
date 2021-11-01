@@ -280,7 +280,8 @@ LRESULT CALLBACK OwnerTxtProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 			OutputDebugString(L"--------------This text control is being hovered---------------\n");
 			//bkgndColor = RGB(100, 0, 0); // red bg
 			//txtColor = RGB(0, 100, 0); // green txt
-			bkgndColor = GetSysColor(COLOR_MENU);
+			//bkgndColor = GetSysColor(COLOR_MENU);
+			bkgndColor = RGB(255, 255, 255);
 			txtColor = GetSysColor(COLOR_MENUTEXT);
 			InvalidateRect(hWnd, NULL, FALSE);
 		}
@@ -2056,94 +2057,6 @@ sptr_t ScintillaWin::SciMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 }
 
 sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
-	//variables for my context menu
-	//flag to move cursor or not
-	//BOOLEAN needMove = false; //false, no need by default
-	////flag for move cases
-	//wchar_t casesLabel;
-
-	//POINT localPt = getCursorPoint();
-
-	//int xCoor = localPt.x;
-	//int yCoor = localPt.y;
-
-	////dependant on initialized coordiante ^
-	//int xMouseCoor = xCoor;
-	//int yMouseCoor = yCoor;
-
-	//int screenWidth = getScreenWidth();
-	//int screenHeight = getScreenHeight();
-
-	//BOOLEAN caseA = (yCoor + contextMenuHeight) > screenHeight; //exceed BOTTOM region only
-	//BOOLEAN caseB = (xCoor + contextMenuWidth) > screenWidth; //exceed RIGHT region only
-	//BOOLEAN caseC = (caseA) && (caseB); //exceed BOTTOM RIGHT region
-	//BOOLEAN caseD = (xCoor - contextMenuWidth) < 0; //exceed LEFT region, 0 represents the very left x-coordinate of screen
-	//BOOLEAN caseE = (yCoor - contextMenuHeight) < 0; //exceed TOP region
-	//BOOLEAN caseF = (caseA) && (caseD); //exceed BOTTOM LEFT region
-	//BOOLEAN caseG = (caseD) && (caseE); //exceed TOP LEFT region
-	//BOOLEAN caseH = (caseB) && (caseE); //exceed TOP RIGHT region
-
-	////logic is used only to determine coordinates of cursor
-	////order of the cases and if statements IMPORTANT!
-	////else, it will be displayed wrongly
-	//if (caseC) { //exceed BOTTOM RIGHT region
-	//	xCoor = (xCoor - contextMenuWidth) + 7;
-	//	yCoor = (yCoor - contextMenuHeight) + 7;
-	//	needMove = true;
-	//	casesLabel = L'c';
-	//}
-	//else if (caseF) { //exceed BOTTOM LEFT region
-	//	xCoor = (xCoor - 7);
-	//	yCoor = (yCoor - contextMenuHeight) + 7;
-	//	needMove = true;
-	//	casesLabel = L'f';
-	//}
-	//else if (caseG) { //exceed TOP LEFT region
-	//	xCoor = (xCoor - 7);
-	//	//yCoor = yCoor;
-	//	needMove = true;
-	//	casesLabel = L'g';
-	//}
-	//else if (caseH) { //exceed TOP RIGHT region
-	//	xCoor = (xCoor - contextMenuWidth) + 7;
-	//	//yCoor = yCoor;
-	//	needMove = true;
-	//	casesLabel = L'h';
-	//}
-	//else if (caseA) { //exceed BOTTOM region only
-	//	//xCoor = (mainPt.x - 7);
-	//	xCoor = (xCoor - (contextMenuWidth / 2));
-	//	yCoor = (yCoor - contextMenuHeight) + 7;
-	//	needMove = true;
-	//	casesLabel = L'a';
-	//}
-	//else if (caseB) { //exceed RIGHT region only
-	//	xCoor = (xCoor - contextMenuWidth) + 7;
-	//	yCoor = (yCoor - (contextMenuWidth / 2));
-	//	needMove = true;
-	//	casesLabel = L'b';
-	//}
-	//else if (caseD) { //exceed LEFT region
-	//	xCoor = (xCoor - 7);
-	//	yCoor = (yCoor - (contextMenuWidth / 2));
-	//	needMove = true;
-	//	casesLabel = L'd';
-	//}
-	//else if (caseE) { //exceed TOP region
-	//	xCoor = (xCoor - (contextMenuWidth / 2));
-	//	//yCoor = yCoor;
-	//	needMove = true;
-	//	casesLabel = L'e';
-	//}
-	//else { //set coordinate at MIDDLE, if not exceed screen
-	//	xCoor = (xCoor - (contextMenuWidth / 2));
-	//	yCoor = (yCoor - (contextMenuWidth / 2));
-	//	needMove = false;
-	//	casesLabel = L'm';
-	//}
-	////------------until here-----------------
-
-
 	try {
 		//Platform::DebugPrintf("S M:%x WP:%x L:%x\n", iMessage, wParam, lParam);
 		iMessage = SciMessageFromEM(iMessage);
@@ -4016,17 +3929,17 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 	case WM_CREATE: //put all sorts of stuff when the context menu is called
 	{
 		const int initialXCoor = 12;
-		const int initialYCoor = 10;
+		const int initialYCoor = 15;
 
 		static int nextXCoor = initialXCoor; //use currentTxtXPos as initial position
 		static int nextYCoor = initialYCoor; //use currentTxtYPos as initial position
 
-		int borderWidth = 120;
-		int borderHeight = 20;
+		int borderWidth = 135;
+		int borderHeight = 35;
 
 		//this is for the positioning
-		const int xGap = 150;
-		const int yGap = 35;
+		const int xGap = 165;
+		const int yGap = 60;
 
 		static int counter = 0;
 
@@ -4079,7 +3992,7 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 			else {
 				theXCoor = xGap;
 			}
-			textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, theXCoor, theYCoor, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
+			textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY | SS_CENTER, theXCoor, theYCoor, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
 			SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
 			SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
 			counter++;
@@ -4158,7 +4071,8 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 		//}
 		
 		//set static color when creating window
-		bkgndColor = GetSysColor(COLOR_MENU);
+		//bkgndColor = GetSysColor(COLOR_MENU);
+		bkgndColor = RGB(255, 255, 255);
 		txtColor = GetSysColor(COLOR_MENUTEXT);
 
 		//set font of the textCtrl
