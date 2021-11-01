@@ -180,8 +180,8 @@ HBRUSH hbrBkgnd = nullptr;
 const UINT APP_CTLCOLORSTATIC = WM_APP + 1; //i guess this is to create a custom message
 
 //context menu window size
-int contextMenuHeight = 300;
-int contextMenuWidth = 300;
+//const int contextMenuHeight = 450;
+//const int contextMenuWidth = 350;
 
 //class for mouse event
 class MouseTrackEvents
@@ -4015,21 +4015,23 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 
 	case WM_CREATE: //put all sorts of stuff when the context menu is called
 	{
-		//x & y positions from context client screen
-		int currentTxtXPos = 10;
-		int currentTxtYPos = 0;
+		const int initialXCoor = 12;
+		const int initialYCoor = 10;
 
-		static int nextTxtXPos = currentTxtXPos; //use currentTxtXPos as initial position
-		static int nextTxtYPos = currentTxtYPos; //use currentTxtYPos as initial position
+		static int nextXCoor = initialXCoor; //use currentTxtXPos as initial position
+		static int nextYCoor = initialYCoor; //use currentTxtYPos as initial position
 
 		int borderWidth = 120;
 		int borderHeight = 20;
 
 		//this is for the positioning
-		const int horiGap = 150;
-		const int vertGap = 20;
+		const int xGap = 150;
+		const int yGap = 35;
 
 		static int counter = 0;
+
+		int theXCoor = 0;
+		int theYCoor = 0;
 
 		//mapping of menu item name
 		std::map<int, LPCWSTR> menuItemNameMap;
@@ -4061,38 +4063,41 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 		//mapping + loop to create context menu
 		//instead of hard coded coordinates
 		for (int i = 0; i < menuItemNameMap.size(); i++) {
-			textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, currentTxtXPos, currentTxtYPos, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
+			if (counter == 0) {
+				theXCoor = initialXCoor;
+				theYCoor = initialYCoor;
+			}
+			else if (counter == 1) {
+				theXCoor = xGap;
+				theYCoor = initialYCoor;
+			}
+			else if (counter % 2 == 0) {
+				theXCoor = initialXCoor;
+				nextYCoor += yGap;
+				theYCoor = nextYCoor;
+			}
+			else {
+				theXCoor = xGap;
+			}
+			textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, theXCoor, theYCoor, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
 			SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
 			SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
-			
-			//asdhadkashksjahkjsdahd
-
-			if ((counter == 0) || (counter % 2 == 0)) { //if even go left
-				nextTxtXPos = 10;
-				nextTxtYPos += vertGap;
-
-				//set new pos to current
-				currentTxtXPos = nextTxtXPos;
-				currentTxtYPos = nextTxtYPos;
-			}
-			else { //if odd go right
-				//nextTxtXPos = 160;
-				nextTxtXPos += horiGap;
-				nextTxtYPos += vertGap;
-
-				//set new pos to current
-				currentTxtXPos = nextTxtXPos;
-				currentTxtYPos = nextTxtYPos;
-			}
 			counter++;
 		}
 
+		//reset all the values once done
+		counter = 0;
+		theXCoor = 0;
+		theYCoor = 0;
+		nextXCoor = initialXCoor;
+		nextYCoor = initialYCoor;
+
 		//if already done, reset both the currentTxtPos
-		currentTxtXPos = 10;
-		currentTxtYPos = 0;
+		/*currentTxtXPos = 10;
+		currentTxtYPos = 10;
 
 		nextTxtXPos = currentTxtXPos;
-		nextTxtYPos = currentTxtYPos;
+		nextTxtYPos = currentTxtYPos;*/
 
 		//mapping style + loop create context menu
 		//for (i; i < menuItemNameMap.size(); i++) {
