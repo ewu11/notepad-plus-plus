@@ -204,7 +204,7 @@ public:
 			tme.dwFlags = TME_HOVER | TME_LEAVE;
 			//tme.dwHoverTime = 1; //1ms
 			//tme.dwHoverTime = 100; //10ms
-			tme.dwHoverTime = 5; //1ms
+			tme.dwHoverTime = 1; //1ms
 			TrackMouseEvent(&tme);
 			m_bMouseTracking = true;
 		}
@@ -261,7 +261,7 @@ LRESULT CALLBACK OwnerTxtProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 	case WM_MOUSEHOVER: {
 
 		if (PtInRect(&txtRt, txtPt)) {
-			OutputDebugString(L"--------------This text control is being hovered---------------\n");
+			//OutputDebugString(L"--------------This text control is being hovered---------------\n");
 			//bkgndColor = RGB(0, 0, 200); // blue
 			//txtColor = RGB(200, 0, 0); // red
 			bkgndColor = GetSysColor(COLOR_HIGHLIGHT);
@@ -306,8 +306,8 @@ LRESULT CALLBACK OwnerTxtProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 	case APP_CTLCOLORSTATIC: {
 		HDC hdc = reinterpret_cast<HDC>(wParam);
 
-		SetTextColor(hdc, txtColor);
 		SetBkColor(hdc, bkgndColor);
+		SetTextColor(hdc, txtColor);
 
 		if (hbrBkgnd) {
 			DeleteBrush(hbrBkgnd);
@@ -3968,29 +3968,25 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 		//font to be set to
 		hFont = CreateFont(17, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Segoe UI"));
 
-		/*textCtrl[0] = CreateWindow(L"STATIC", L"This is text A.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, txtYPos, borderWidth, borderHeight, hWnd, (HMENU)FIRST_TEXT_ID, nullptr, nullptr);
-		textCtrl[1] = CreateWindow(L"STATIC", L"This is text B.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, (txtYPos + 50), borderWidth, borderHeight, hWnd, (HMENU)SECOND_TEXT_ID, nullptr, nullptr);
-		textCtrl[2] = CreateWindow(L"STATIC", L"This is text C.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos + 140), txtYPos, borderWidth, borderHeight, hWnd, (HMENU)THIRD_TEXT_ID, nullptr, nullptr);
-		textCtrl[3] = CreateWindow(L"STATIC", L"This is text D.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos + 140), (txtYPos + 50), borderWidth, borderHeight, hWnd, (HMENU)FOURTH_TEXT_ID, nullptr, nullptr);*/
-
 		//mapping + loop to create context menu
 		//instead of hard coded coordinates
 		for (int i = 0; i < menuItemNameMap.size(); i++) {
-			if (counter == 0) {
+			if (counter == 0) { //set at initial spot at left
 				theXCoor = initialXCoor;
 				theYCoor = initialYCoor;
 			}
-			else if (counter == 1) {
-				theXCoor = xGap;
-				theYCoor = initialYCoor;
+			else if (counter == 1) { //same level as [0], but at right side
+				theXCoor = xGap; //set at right
+				theYCoor = initialYCoor; //same level as [0]
 			}
-			else if (counter % 2 == 0) {
-				theXCoor = initialXCoor;
-				nextYCoor += yGap;
+			else if (counter % 2 == 0) { //if even go left
+				theXCoor = initialXCoor; //always at left
+				nextYCoor += yGap; //put under [0]
 				theYCoor = nextYCoor;
 			}
-			else {
-				theXCoor = xGap;
+			else { //if odd, go right
+				theXCoor = xGap; //ensure that always at right
+				//theYCoor here is not set since it follows the previous 'theYCoor'
 			}
 			textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY | SS_CENTER, theXCoor, theYCoor, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
 			SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
@@ -4003,88 +3999,12 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 		theXCoor = 0;
 		theYCoor = 0;
 		nextXCoor = initialXCoor;
-		nextYCoor = initialYCoor;
-
-		//if already done, reset both the currentTxtPos
-		/*currentTxtXPos = 10;
-		currentTxtYPos = 10;
-
-		nextTxtXPos = currentTxtXPos;
-		nextTxtYPos = currentTxtYPos;*/
-
-		//mapping style + loop create context menu
-		//for (i; i < menuItemNameMap.size(); i++) {
-		//	if ((count == 0) || (count == isOdd)) { //to make menu item go left side
-
-		//		txtXPos = 10;
-		//		txtYPos = heightCountFirstCol; // to make menu item stacky look
-		//		//heightCountFirstCol += increaseGapBy;
-		//		//MessageBox(nullptr, L"Masuk Odd", L":D", MB_OK);
-		//		OutputDebugString(L"Masuk Odd\n");
-		//	}
-		//	if (count == isEven) { //to make menu item go right side
-		//		txtXPos = (20 + borderWidth);
-		//		txtYPos = heightCountSecondCol; // to make menu item stacky look
-		//		//heightCountSecondCol += increaseGapBy;
-		//		//MessageBox(nullptr, L"Masuk Even", L":D", MB_OK);
-		//		OutputDebugString(L"Masuk Even\n");
-		//	}
-		//	textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, txtYPos, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
-		//	SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
-		//	SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
-		//	count+=1;
-		//	heightCountFirstCol += increaseGapBy;
-		//	heightCountSecondCol += increaseGapBy;
-		//}
-
-		//mapping style + loop create context menu
-		//for (i; i < menuItemNameMap.size(); i++) {
-		//	if ((count == 0) || (count == isOdd)) { //to make menu item go left side
-
-		//		txtXPos = 10;
-		//		txtYPos = heightCountFirstCol; // to make menu item stacky look
-		//		//heightCountFirstCol += increaseGapBy;
-		//		//MessageBox(nullptr, L"Masuk Odd", L":D", MB_OK);
-		//		OutputDebugString(L"Masuk Odd\n");
-		//	}
-		//	if (count == isEven) { //to make menu item go right side
-		//		txtXPos = (20 + borderWidth);
-		//		txtYPos = heightCountSecondCol; // to make menu item stacky look
-		//		//heightCountSecondCol += increaseGapBy;
-		//		//MessageBox(nullptr, L"Masuk Even", L":D", MB_OK);
-		//		OutputDebugString(L"Masuk Even\n");
-		//	}
-		//	textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, txtYPos, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
-		//	SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
-		//	SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
-		//}
-
-		//int rowGap = 0;
-		////mapping style + loop create context menu
-		//for (int i = 0; i < menuItemNameMap.size(); i++) {
-		//	textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos), (txtYPos + rowGap), borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
-		//	//i += 1;
-		//	textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos + 50), (txtYPos + rowGap), borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
-		//	rowGap += 50;
-		//	//SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
-		//	SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
-		//}
+		nextYCoor = initialYCoor;		
 		
 		//set static color when creating window
 		//bkgndColor = GetSysColor(COLOR_MENU);
 		bkgndColor = RGB(255, 255, 255);
 		txtColor = GetSysColor(COLOR_MENUTEXT);
-
-		//set font of the textCtrl
-		//doesnt work if handler target = hChild
-		/*for (int i = 0; i < textCtrlSize; i++) {
-			SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
-			SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
-		}*/
-
-		/*txtHwnd = CreateWindow(L"Static", L"Hello World!", WS_VISIBLE | WS_CHILD | SS_NOTIFY, 100, 100, 120, 30, hChild, (HMENU)testingTxtID, nullptr, nullptr);
-		SendMessage(txtHwnd, WM_SETFONT, (WPARAM)hFont, TRUE);
-		SetWindowSubclass(txtHwnd, OwnerTxtProc, 0, 0);*/
 
 		break;
 	}
