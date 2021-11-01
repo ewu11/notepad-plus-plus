@@ -4016,24 +4016,20 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 	case WM_CREATE: //put all sorts of stuff when the context menu is called
 	{
 		//x & y positions from context client screen
-		int txtXPos = 10;
-		int txtYPos = 0;
+		int currentTxtXPos = 10;
+		int currentTxtYPos = 0;
+
+		static int nextTxtXPos = currentTxtXPos; //use currentTxtXPos as initial position
+		static int nextTxtYPos = currentTxtYPos; //use currentTxtYPos as initial position
 
 		int borderWidth = 120;
 		int borderHeight = 20;
 
 		//this is for the positioning
-		int horiGap = 10;
-		int vertGap = 10;
+		const int horiGap = 150;
+		const int vertGap = 20;
 
-		//static int heightCount = vertGap + borderHeight; //this is the initial height count
-		static int heightCountFirstCol = vertGap + borderHeight; //this is the initial height count
-		static int heightCountSecondCol = vertGap + borderHeight; //this is the initial height count
-		int increaseGapBy = 10 + vertGap + borderHeight;
-
-		static int count = 0;
-		bool isEven = (2%2==0);
-		bool isOdd = !isEven;
+		static int counter = 0;
 
 		//mapping of menu item name
 		std::map<int, LPCWSTR> menuItemNameMap;
@@ -4062,26 +4058,100 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 		textCtrl[2] = CreateWindow(L"STATIC", L"This is text C.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos + 140), txtYPos, borderWidth, borderHeight, hWnd, (HMENU)THIRD_TEXT_ID, nullptr, nullptr);
 		textCtrl[3] = CreateWindow(L"STATIC", L"This is text D.", WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos + 140), (txtYPos + 50), borderWidth, borderHeight, hWnd, (HMENU)FOURTH_TEXT_ID, nullptr, nullptr);*/
 
-
-		//mapping style + loop create context menu
+		//mapping + loop to create context menu
+		//instead of hard coded coordinates
 		for (int i = 0; i < menuItemNameMap.size(); i++) {
-			if ((count == 0) || (count == isOdd)) { //to make menu item go left side
-				txtXPos = 10;
-				txtYPos = heightCountFirstCol; // to make menu item stacky look
-				heightCountFirstCol += increaseGapBy;
-			}
-			else if (count == isEven) { //to make menu item go right side
-				txtXPos = (20 + borderWidth);
-				txtYPos = heightCountSecondCol; // to make menu item stacky look
-				heightCountSecondCol += increaseGapBy;
-			}
-			textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, txtYPos, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
+			textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, currentTxtXPos, currentTxtYPos, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
 			SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
 			SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
-			count++;
-		}
-		
+			
+			//asdhadkashksjahkjsdahd
 
+			if ((counter == 0) || (counter % 2 == 0)) { //if even go left
+				nextTxtXPos = 10;
+				nextTxtYPos += vertGap;
+
+				//set new pos to current
+				currentTxtXPos = nextTxtXPos;
+				currentTxtYPos = nextTxtYPos;
+			}
+			else { //if odd go right
+				//nextTxtXPos = 160;
+				nextTxtXPos += horiGap;
+				nextTxtYPos += vertGap;
+
+				//set new pos to current
+				currentTxtXPos = nextTxtXPos;
+				currentTxtYPos = nextTxtYPos;
+			}
+			counter++;
+		}
+
+		//if already done, reset both the currentTxtPos
+		currentTxtXPos = 10;
+		currentTxtYPos = 0;
+
+		nextTxtXPos = currentTxtXPos;
+		nextTxtYPos = currentTxtYPos;
+
+		//mapping style + loop create context menu
+		//for (i; i < menuItemNameMap.size(); i++) {
+		//	if ((count == 0) || (count == isOdd)) { //to make menu item go left side
+
+		//		txtXPos = 10;
+		//		txtYPos = heightCountFirstCol; // to make menu item stacky look
+		//		//heightCountFirstCol += increaseGapBy;
+		//		//MessageBox(nullptr, L"Masuk Odd", L":D", MB_OK);
+		//		OutputDebugString(L"Masuk Odd\n");
+		//	}
+		//	if (count == isEven) { //to make menu item go right side
+		//		txtXPos = (20 + borderWidth);
+		//		txtYPos = heightCountSecondCol; // to make menu item stacky look
+		//		//heightCountSecondCol += increaseGapBy;
+		//		//MessageBox(nullptr, L"Masuk Even", L":D", MB_OK);
+		//		OutputDebugString(L"Masuk Even\n");
+		//	}
+		//	textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, txtYPos, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
+		//	SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
+		//	SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
+		//	count+=1;
+		//	heightCountFirstCol += increaseGapBy;
+		//	heightCountSecondCol += increaseGapBy;
+		//}
+
+		//mapping style + loop create context menu
+		//for (i; i < menuItemNameMap.size(); i++) {
+		//	if ((count == 0) || (count == isOdd)) { //to make menu item go left side
+
+		//		txtXPos = 10;
+		//		txtYPos = heightCountFirstCol; // to make menu item stacky look
+		//		//heightCountFirstCol += increaseGapBy;
+		//		//MessageBox(nullptr, L"Masuk Odd", L":D", MB_OK);
+		//		OutputDebugString(L"Masuk Odd\n");
+		//	}
+		//	if (count == isEven) { //to make menu item go right side
+		//		txtXPos = (20 + borderWidth);
+		//		txtYPos = heightCountSecondCol; // to make menu item stacky look
+		//		//heightCountSecondCol += increaseGapBy;
+		//		//MessageBox(nullptr, L"Masuk Even", L":D", MB_OK);
+		//		OutputDebugString(L"Masuk Even\n");
+		//	}
+		//	textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, txtXPos, txtYPos, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
+		//	SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
+		//	SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
+		//}
+
+		//int rowGap = 0;
+		////mapping style + loop create context menu
+		//for (int i = 0; i < menuItemNameMap.size(); i++) {
+		//	textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos), (txtYPos + rowGap), borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
+		//	//i += 1;
+		//	textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY, (txtXPos + 50), (txtYPos + rowGap), borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
+		//	rowGap += 50;
+		//	//SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
+		//	SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
+		//}
+		
 		//set static color when creating window
 		bkgndColor = GetSysColor(COLOR_MENU);
 		txtColor = GetSysColor(COLOR_MENUTEXT);
