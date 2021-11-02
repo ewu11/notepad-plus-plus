@@ -236,87 +236,75 @@ LRESULT CALLBACK OwnerTxtProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 	switch (uMsg) {
 
-	case WM_CREATE: {
-		myMsgBox[0] = MessageBox(nullptr, L"Yessir!", L":D", MB_OK | MB_ICONINFORMATION);
-		break;
-	}
-
-	case WM_NCDESTROY: {
-		RemoveWindowSubclass(hWnd, OwnerTxtProc, uIdSubclass);
-		if (hbrBkgnd) {
-			DeleteBrush(hbrBkgnd);
-			hbrBkgnd = NULL;
-		}
-		//bMouseTracking = false;
-		mouseTrack.Reset(hWnd);
-		break;
-	}
-
-	case WM_MOUSEMOVE: {
-		mouseTrack.OnMouseMove(hWnd); //activate mouse tracking
-
-		break;
-	}
-
-	case WM_MOUSEHOVER: {
-
-		if (PtInRect(&txtRt, txtPt)) {
-			//OutputDebugString(L"--------------This text control is being hovered---------------\n");
-			//bkgndColor = RGB(0, 0, 200); // blue
-			//txtColor = RGB(200, 0, 0); // red
-			bkgndColor = GetSysColor(COLOR_HIGHLIGHT);
-			txtColor = GetSysColor(COLOR_HIGHLIGHTTEXT);
-			InvalidateRect(hWnd, NULL, FALSE);
+		case WM_CREATE: {
+			myMsgBox[0] = MessageBox(nullptr, L"Yessir!", L":D", MB_OK | MB_ICONINFORMATION);
+			break;
 		}
 
-		mouseTrack.Reset(hWnd);
-
-		break;
-	}
-
-	case WM_MOUSELEAVE: {
-
-		if (!(PtInRect(&txtRt, txtPt))) {
-			OutputDebugString(L"--------------This text control is being hovered---------------\n");
-			//bkgndColor = RGB(100, 0, 0); // red bg
-			//txtColor = RGB(0, 100, 0); // green txt
-			//bkgndColor = GetSysColor(COLOR_MENU);
-			bkgndColor = RGB(255, 255, 255);
-			txtColor = GetSysColor(COLOR_MENUTEXT);
-			InvalidateRect(hWnd, NULL, FALSE);
+		case WM_NCDESTROY: {
+			RemoveWindowSubclass(hWnd, OwnerTxtProc, uIdSubclass);
+			if (hbrBkgnd) {
+				DeleteBrush(hbrBkgnd);
+				hbrBkgnd = NULL;
+			}
+			//bMouseTracking = false;
+			mouseTrack.Reset(hWnd);
+			break;
 		}
 
-		mouseTrack.Reset(hWnd);
+		case WM_MOUSEMOVE: {
+			mouseTrack.OnMouseMove(hWnd); //activate mouse tracking
 
-		break;
-	}
-
-	case WM_LBUTTONDOWN: {
-		wmId = LOWORD(wParam);
-		wmEvent = HIWORD(wParam);
-
-		int HI = swprintf_s(wParamHI, 1000, L"wParamHI: %d", wmEvent);
-		MessageBox(nullptr, wParamHI, L":D", MB_OK | MB_ICONINFORMATION);
-
-		int LO = swprintf_s(wParamLO, 1000, L"wParamLO: %d", wmId);
-		MessageBox(nullptr, wParamLO, L":D", MB_OK | MB_ICONINFORMATION);
-		break;
-	}
-
-	case APP_CTLCOLORSTATIC: {
-		HDC hdc = reinterpret_cast<HDC>(wParam);
-
-		SetBkColor(hdc, bkgndColor);
-		SetTextColor(hdc, txtColor);
-
-		if (hbrBkgnd) {
-			DeleteBrush(hbrBkgnd);
+			break;
 		}
-		hbrBkgnd = CreateSolidBrush(bkgndColor);
 
-		//return reinterpret_cast<LRESULT&>(bkgndColor); //--> error --> so i added '&'
-		return (LRESULT)hbrBkgnd;
-	}
+		case WM_MOUSEHOVER: {
+
+			if (PtInRect(&txtRt, txtPt)) {
+				//OutputDebugString(L"--------------This text control is being hovered---------------\n");
+				//bkgndColor = RGB(0, 0, 200); // blue
+				//txtColor = RGB(200, 0, 0); // red
+				bkgndColor = GetSysColor(COLOR_HIGHLIGHT);
+				txtColor = GetSysColor(COLOR_HIGHLIGHTTEXT);
+				InvalidateRect(hWnd, NULL, FALSE);
+			}
+
+			mouseTrack.Reset(hWnd);
+
+			break;
+		}
+
+		case WM_MOUSELEAVE: {
+
+			if (!(PtInRect(&txtRt, txtPt))) {
+				OutputDebugString(L"--------------This text control is being hovered---------------\n");
+				//bkgndColor = RGB(100, 0, 0); // red bg
+				//txtColor = RGB(0, 100, 0); // green txt
+				//bkgndColor = GetSysColor(COLOR_MENU);
+				bkgndColor = RGB(255, 255, 255);
+				txtColor = GetSysColor(COLOR_MENUTEXT);
+				InvalidateRect(hWnd, NULL, FALSE);
+			}
+
+			mouseTrack.Reset(hWnd);
+
+			break;
+		}
+
+		case APP_CTLCOLORSTATIC: {
+			HDC hdc = reinterpret_cast<HDC>(wParam);
+
+			SetBkColor(hdc, bkgndColor);
+			SetTextColor(hdc, txtColor);
+
+			if (hbrBkgnd) {
+				DeleteBrush(hbrBkgnd);
+			}
+			hbrBkgnd = CreateSolidBrush(bkgndColor);
+
+			//return reinterpret_cast<LRESULT&>(bkgndColor); //--> error --> so i added '&'
+			return (LRESULT)hbrBkgnd;
+		}
 	}
 	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
 }
