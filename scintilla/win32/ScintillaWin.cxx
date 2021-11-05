@@ -159,10 +159,6 @@ typedef UINT_PTR (WINAPI *SetCoalescableTimerSig)(HWND hwnd, UINT_PTR nIDEvent,
 //-----------these are my codes-------------
 ATOM MyRegisterClass(HINSTANCE);
 LRESULT CALLBACK CustomContextMenuProc(HWND, UINT, WPARAM, LPARAM);
-POINT getCoordinate(LPARAM);
-int getScreenWidth();
-int getScreenHeight();
-POINT getCursorPoint();
 
 //my global variables
 //identifier to a window
@@ -4043,25 +4039,4 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
-}
-
-////newer get coordinate
-POINT getCursorPoint() {
-	POINT thePt;
-	GetCursorPos(&thePt);
-	return thePt;
-}
-
-int getScreenWidth() {
-	HDC theHDC = GetDC(0); //info of screen
-	int screenWidth = GetDeviceCaps(theHDC, HORZRES);
-	ReleaseDC(0, theHDC);
-	return screenWidth;
-}
-
-int getScreenHeight() {
-	HDC theHDC = GetDC(0); //info of screen
-	int screenHeight = GetDeviceCaps(theHDC, VERTRES);
-	ReleaseDC(0, theHDC);
-	return screenHeight;
 }
