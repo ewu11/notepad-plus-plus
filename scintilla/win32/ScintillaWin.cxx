@@ -5,7 +5,6 @@
 // Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-//#include <Windows.h> //this one i need
 #include <cstddef>
 #include <cstdlib>
 #include <cassert>
@@ -13,8 +12,6 @@
 #include <cstdio>
 #include <cmath>
 #include <climits>
-
-
 
 #include <stdexcept>
 #include <new>
@@ -37,7 +34,7 @@
 #undef WINVER
 #define WINVER 0x0500
 //#include <windows.h>
-//#include <commctrl.h>
+#include <commctrl.h>
 #include <richedit.h>
 #include <windowsx.h>
 #include <zmouse.h>
@@ -94,15 +91,9 @@
 #include "ScintillaWin.h"
 #include "BoostRegexSearch.h"
 
-
-
 #ifndef SPI_GETWHEELSCROLLLINES
 #define SPI_GETWHEELSCROLLLINES   104
 #endif
-
-//these are mine
-#include <tchar.h>
-//#include <Windows.h> //this one i need
 
 #ifndef WM_UNICHAR
 #define WM_UNICHAR                      0x0109

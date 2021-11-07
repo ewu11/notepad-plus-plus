@@ -146,7 +146,6 @@ LRESULT CALLBACK Notepad_plus_Window::Notepad_plus_Proc(HWND hwnd, UINT message,
 				NppDarkMode::enableDarkScrollBarForWindowAndChildren(hwnd);
 			}
 
-			//MessageBox(nullptr, L"Hmmmmm..it runs here...", L":D", MB_OK);
 			//my part
 			//register context menu window class
 			MyRegisterClass(contextMenuHInst);
@@ -1694,7 +1693,7 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			BOOLEAN caseG = (caseD) && (caseE); //exceed TOP LEFT region
 			BOOLEAN caseH = (caseB) && (caseE); //exceed TOP RIGHT region
 
-			//HFONT hFont; //for the font, doesnt work 'cuz got npp got higher priority
+			//HFONT hFont;
 
 			//logic is used only to determine coordinates of cursor
 			//order of the cases and if statements IMPORTANT!
@@ -1768,17 +1767,6 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 						switchEditViewTo(MAIN_VIEW);
 					else
 						switchEditViewTo(SUB_VIEW);
-
-					//default codes
-					/*OutputDebugString(L"Default Context Menu Opens...\n");
-					POINT p;
-					::GetCursorPos(&p);
-					ContextMenu scintillaContextmenu;
-					std::vector<MenuItemUnit>& tmp = nppParam.getContextMenuItems();
-					bool copyLink = (_pEditView->getSelectedTextCount() == 0) && _pEditView->getIndicatorRange(URL_INDIC);
-					scintillaContextmenu.create(hwnd, tmp, _mainMenuHandle, copyLink);
-					scintillaContextmenu.display(p);
-					return TRUE;*/
 
 					////my part
 					int ctrlKey = GetKeyState(VK_CONTROL);
@@ -3040,13 +3028,6 @@ LRESULT CALLBACK OwnerTxtProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 	UNREFERENCED_PARAMETER(dwRefData);
 
 	const int numOfMsg = 4;
-	//int myMsgBox[numOfMsg]; //limit to only 4
-
-	//just want to print what wparam is..
-	//int wmId, wmEvent;
-
-	//wchar_t wParamHI[1000];
-	//wchar_t wParamLO[1000];
 
 	RECT txtRt;
 	GetWindowRect(hWnd, &txtRt);
@@ -3133,26 +3114,11 @@ LRESULT CALLBACK OwnerTxtProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 //used for windows
 LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	//int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
-	//HDC hdcStatic;
-	//RECT rc;
-
-	//HBRUSH hbrWhite, hbrGray; //brushes for painting
-
-	//hChild = hWnd; //window handler for context menu
 
 	const int textCtrlSize = 15;
 	HWND textCtrl[textCtrlSize]; //array for text controls
-
-	//used by edit control
-	/*int xCoorI = 20;
-	int yCoorI = 25;
-	int textWidth = 190;
-	int textHeight = 50;*/
-
-	//HBRUSH hbrBkgnd;// = CreateSolidBrush(RGB(255, 255, 255));
 
 	HFONT hFont;
 
@@ -3186,51 +3152,51 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 		break;
 	}
 
-					  /*case WM_CONTEXTMENU: {
-						  ctrlKey = GetKeyState(VK_CONTROL);
-						  rMBtn = GetAsyncKeyState(VK_RBUTTON);
+	/*case WM_CONTEXTMENU: {
+		ctrlKey = GetKeyState(VK_CONTROL);
+		rMBtn = GetAsyncKeyState(VK_RBUTTON);
 
-						  if ((ctrlKey & 0x8000)) {
-							  OutputDebugString(L"AAAA ctrlKey down!\n");
-						  }
-						  if (rMBtn) {
-							  MessageBox(nullptr, L"rMBtn down!", L":D", MB_OK);
-							  OutputDebugString(L"BBBB rMBtn down!\n");
-						  }
-						  if (((ctrlKey & 0x8000)) && rMBtn) {
-							  OutputDebugString(L"both were down YASSS!\n");
-						  }
-						  else {
-							  MessageBox(nullptr, L"Nothing was down!", L":(", MB_OK);
-							  OutputDebugString(L"XXXX Nothing was down!\n");
-						  }
-						  break;
-					  }*/
+		if ((ctrlKey & 0x8000)) {
+			OutputDebugString(L"AAAA ctrlKey down!\n");
+		}
+		if (rMBtn) {
+			MessageBox(nullptr, L"rMBtn down!", L":D", MB_OK);
+			OutputDebugString(L"BBBB rMBtn down!\n");
+		}
+		if (((ctrlKey & 0x8000)) && rMBtn) {
+			OutputDebugString(L"both were down YASSS!\n");
+		}
+		else {
+			MessageBox(nullptr, L"Nothing was down!", L":(", MB_OK);
+			OutputDebugString(L"XXXX Nothing was down!\n");
+		}
+		break;
+	}*/
 
-					  //case WM_LBUTTONDOWN: {
-					  //	rMBtn = GetKeyState(VK_RBUTTON);
+	//case WM_LBUTTONDOWN: {
+	//	rMBtn = GetKeyState(VK_RBUTTON);
 
-					  //	if ((rMBtn & 0x8000) != 0) {
-					  //		//MessageBox(nullptr, L"rMBtn down!", L":D", MB_OK);
-					  //		OutputDebugString(L"BBBB rMBtn down!\n");
-					  //	}
-					  //	else {
-					  //		OutputDebugString(L"xxxxxxlaaaaaaaaaa!\n");
-					  //	}
+	//	if ((rMBtn & 0x8000) != 0) {
+	//		//MessageBox(nullptr, L"rMBtn down!", L":D", MB_OK);
+	//		OutputDebugString(L"BBBB rMBtn down!\n");
+	//	}
+	//	else {
+	//		OutputDebugString(L"xxxxxxlaaaaaaaaaa!\n");
+	//	}
 
-					  //	break;
-					  //}
+	//	break;
+	//}
 
-					  /*case WM_RBUTTONUP: {
-						  if (wParam & MK_CONTROL) {
-							  MessageBox(nullptr, L"AIKAIKAIK?!", L":D", MB_OK);
-						  }
-						  else {
-							  MessageBox(nullptr, L"nope :(", L":D", MB_OK);
-						  }
+	/*case WM_RBUTTONUP: {
+		if (wParam & MK_CONTROL) {
+			MessageBox(nullptr, L"AIKAIKAIK?!", L":D", MB_OK);
+		}
+		else {
+			MessageBox(nullptr, L"nope :(", L":D", MB_OK);
+		}
 
-						  break;
-					  }*/
+		break;
+	}*/
 
 	case WM_CREATE: //put all sorts of stuff when the context menu is called
 	{
@@ -3317,36 +3283,6 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 
 	case WM_COMMAND:
 	{
-		//::command(LOWORD(wParam));
-		//wmId = LOWORD(wParam);
-		//wmEvent = HIWORD(wParam);
-
-		//to test case for wparam
-		//switch (wmId) {
-		//case FIRST_TEXT_ID:
-		//	DestroyWindow(hWnd);
-		//	MessageBox(nullptr, L" First text control clicked!", L"Alert", MB_OK | MB_ICONINFORMATION);
-		//	break;
-		//case SECOND_TEXT_ID:
-		//	DestroyWindow(hWnd);
-		//	MessageBox(nullptr, L" Second text control clicked!", L"Alert", MB_OK | MB_ICONINFORMATION);
-		//	break;
-		//case THIRD_TEXT_ID:
-		//	DestroyWindow(hWnd);
-		//	MessageBox(nullptr, L" Third text control clicked!", L"Alert", MB_OK | MB_ICONINFORMATION);
-		//	break;
-		//case FOURTH_TEXT_ID:
-		//	DestroyWindow(hWnd);
-		//	MessageBox(nullptr, L" Fourth text control clicked!", L"Alert", MB_OK | MB_ICONINFORMATION);
-		//	break;
-
-		//	//for testing only
-		//case testingTxtID:
-		//	//DestroyWindow(hChild);
-		//	MessageBox(nullptr, L" Hello World!", L":D", MB_OK | MB_ICONINFORMATION);
-		//	break;
-		//}
-
 		break;
 	}
 
