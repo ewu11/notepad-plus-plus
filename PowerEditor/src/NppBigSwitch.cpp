@@ -64,7 +64,7 @@ HBRUSH hbrBkgnd = nullptr;
 const UINT APP_CTLCOLORSTATIC = WM_APP + 1; //i guess this is to create a custom message
 
 //context menu window size
-const int contextMenuHeight = 480;
+const int contextMenuHeight = 390;
 const int contextMenuWidth = 320;
 
 //class for mouse event
@@ -3216,12 +3216,15 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 		static int nextXCoor = initialXCoor; //use currentTxtXPos as initial position
 		static int nextYCoor = initialYCoor; //use currentTxtYPos as initial position
 
+		//int borderWidth = 135;
+		//int borderHeight = 35;
+
 		int borderWidth = 135;
-		int borderHeight = 35;
+		int borderHeight = 38;
 
 		//this is for the positioning
 		const int xGap = 165;
-		const int yGap = 60;
+		const int yGap = 45;
 
 		static int counter = 0;
 
@@ -3234,38 +3237,55 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 		menuItemNameMap[0] = L"Cut";
 		menuItemNameMap[1] = L"Delete";
 		menuItemNameMap[2] = L"Copy";
-		menuItemNameMap[3] = L"Select all";
-		menuItemNameMap[4] = L"Begin/ End select";
-		menuItemNameMap[5] = L"Style token";
-		menuItemNameMap[6] = L"Remove style";
-		menuItemNameMap[7] = L"UPPERCASE";
-		menuItemNameMap[8] = L"lowercase";
-		menuItemNameMap[9] = L"Open file";
-		menuItemNameMap[10] = L"Search on internet";
-		menuItemNameMap[11] = L"Toggle single line comment";
-		menuItemNameMap[12] = L"Block comment";
-		menuItemNameMap[13] = L"Hide lines";
-		menuItemNameMap[14] = L"Block uncomment";
+		menuItemNameMap[3] = L"Paste";
+		menuItemNameMap[4] = L"Select all";
+		menuItemNameMap[5] = L"Begin/ End select";
+		menuItemNameMap[6] = L"Style token";
+		menuItemNameMap[7] = L"Remove style";
+		menuItemNameMap[8] = L"UPPERCASE";
+		menuItemNameMap[9] = L"lowercase";
+		menuItemNameMap[10] = L"Open file";
+		menuItemNameMap[11] = L"Search on internet";
+		menuItemNameMap[12] = L"Toggle single line comment";
+		menuItemNameMap[13] = L"Block comment";
+		menuItemNameMap[14] = L"Hide lines";
+		menuItemNameMap[15] = L"Block uncomment";
 
 		//mapping of menu item with wParam message codes
 		//order based on menuItemNameMap above
 		//<index number, message number based on "menuCmdID.h">
 		std::map<int, INT_PTR> menuItemFunction;
+		//menuItemFunction[0] = 42001;
+		//menuItemFunction[1] = 42006;
+		//menuItemFunction[2] = 42002;
+		//menuItemFunction[3] = 42007;
+		//menuItemFunction[4] = 42020;
+		//menuItemFunction[5] = 1; //dummy
+		//menuItemFunction[6] = 1; //dummy
+		//menuItemFunction[7] = 42016;
+		//menuItemFunction[8] = 42017;
+		//menuItemFunction[9] = 42073;
+		//menuItemFunction[10] = 42075;
+		//menuItemFunction[11] = 42022;
+		//menuItemFunction[12] = 42023;
+		//menuItemFunction[13] = 44042;
+		//menuItemFunction[14] = 42047;
 		menuItemFunction[0] = 42001;
 		menuItemFunction[1] = 42006;
 		menuItemFunction[2] = 42002;
-		menuItemFunction[3] = 42007;
-		menuItemFunction[4] = 42020;
-		menuItemFunction[5] = 1; //dummy
+		menuItemFunction[3] = 42005;
+		menuItemFunction[4] = 42007;
+		menuItemFunction[5] = 42020;
 		menuItemFunction[6] = 1; //dummy
-		menuItemFunction[7] = 42016;
-		menuItemFunction[8] = 42017;
-		menuItemFunction[9] = 42073;
-		menuItemFunction[10] = 42075;
-		menuItemFunction[11] = 42022;
-		menuItemFunction[12] = 42023;
-		menuItemFunction[13] = 44042;
-		menuItemFunction[14] = 42047;
+		menuItemFunction[7] = 1; //dummy
+		menuItemFunction[8] = 42016;
+		menuItemFunction[9] = 42017;
+		menuItemFunction[10] = 42073;
+		menuItemFunction[11] = 42075;
+		menuItemFunction[12] = 42022;
+		menuItemFunction[13] = 42023;
+		menuItemFunction[14] = 44042;
+		menuItemFunction[15] = 42047;
 
 		//font to be set to
 		hFont = CreateFont(17, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Segoe UI"));
@@ -3320,12 +3340,12 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 			//this is for dummy function, not really working
 			case CUSTOM_TEXT_CONTROL: {
 				MessageBox(nullptr, L"Hello World!", L"", MB_OK);
-				DestroyWindow(hWnd);
+				DestroyWindow(hWnd); //after click, close the context menu
 			}
 			//else notify the parent to handle the message
 			default: {
 				SendMessageW(GetParent(hWnd), WM_COMMAND, wmId, 0);
-				DestroyWindow(hWnd);
+				DestroyWindow(hWnd); //after click, close the context menu
 			}
 		}
 		//----
