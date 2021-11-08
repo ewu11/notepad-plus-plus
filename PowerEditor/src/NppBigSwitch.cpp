@@ -53,11 +53,7 @@ const int getScreenHeight();
 
 //my global variables
 //identifier to a window
-#define FIRST_TEXT_ID 1
-#define SECOND_TEXT_ID 2
-#define THIRD_TEXT_ID 3
-#define FOURTH_TEXT_ID 4
-#define testingTxtID 109
+#define CUSTOM_TEXT_CONTROL 1
 
 HINSTANCE contextMenuHInst;
 HWND cstmHwnd;
@@ -767,6 +763,16 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		case WM_COMMAND:
 		{
+			////mine
+			//int wmId = LOWORD(wParam);
+			//
+			//switch (wmId) {
+			//case CUSTOM_TEXT_CONTROL: {
+			//	command(LOWORD(wParam));
+			//}
+			//}
+			////----
+
 			if (HIWORD(wParam) == SCEN_SETFOCUS)
 			{
 				HWND hMain = _mainEditView.getHSelf(), hSec = _subEditView.getHSelf();
@@ -783,6 +789,10 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			}
 			else
 			{
+				if (LOWORD(wParam) == 1) {
+					//check for dummy responses
+					MessageBox(hwnd, L"Hello World!", L":D", MB_OK | MB_ICONINFORMATION);
+				}
 				command(LOWORD(wParam));
 			}
 			return TRUE;
@@ -3078,7 +3088,7 @@ LRESULT CALLBACK OwnerTxtProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 	case WM_MOUSELEAVE: {
 
 		if (!(PtInRect(&txtRt, txtPt))) {
-			OutputDebugString(L"--------------This text control is being hovered---------------\n");
+			//OutputDebugString(L"--------------This text control is not being hovered---------------\n");
 			//bkgndColor = RGB(100, 0, 0); // red bg
 			//txtColor = RGB(0, 100, 0); // green txt
 			//bkgndColor = GetSysColor(COLOR_MENU);
@@ -3146,7 +3156,7 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 	}
 
 	case WM_MOUSEHOVER: {
-		OutputDebugString(L"Context Menu is being hovered...\n");
+		//OutputDebugString(L"Context Menu is being hovered...\n");
 		//MessageBox(nullptr, L"Testing", L"Testing", MB_OK);
 
 		break;
@@ -3219,7 +3229,7 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 		int theYCoor = 0;
 
 		//mapping of menu item name
-		std::map<int, LPCWSTR> menuItemNameMap;
+		std::map<INT_PTR, LPCWSTR> menuItemNameMap;
 		//equivalent -> menuItemNameMap.insert ( std::pair<int, LPCSTR>(0, "Cut") );
 		menuItemNameMap[0] = L"Cut";
 		menuItemNameMap[1] = L"Delete";
@@ -3236,6 +3246,26 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 		menuItemNameMap[12] = L"Block comment";
 		menuItemNameMap[13] = L"Hide lines";
 		menuItemNameMap[14] = L"Block uncomment";
+
+		//mapping of menu item with wParam message codes
+		//order based on menuItemNameMap above
+		//<index number, message number based on "menuCmdID.h">
+		std::map<int, INT_PTR> menuItemFunction;
+		menuItemFunction[0] = 42001;
+		menuItemFunction[1] = 42006;
+		menuItemFunction[2] = 42002;
+		menuItemFunction[3] = 42007;
+		menuItemFunction[4] = 42020;
+		menuItemFunction[5] = 1; //dummy
+		menuItemFunction[6] = 1; //dummy
+		menuItemFunction[7] = 42016;
+		menuItemFunction[8] = 42017;
+		menuItemFunction[9] = 42073;
+		menuItemFunction[10] = 42075;
+		menuItemFunction[11] = 42022;
+		menuItemFunction[12] = 42023;
+		menuItemFunction[13] = 44042;
+		menuItemFunction[14] = 42047;
 
 		//font to be set to
 		hFont = CreateFont(17, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Segoe UI"));
@@ -3260,7 +3290,7 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 				theXCoor = xGap; //ensure that always at right
 				//theYCoor here is not set since it follows the previous 'theYCoor'
 			}
-			textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY | SS_CENTER, theXCoor, theYCoor, borderWidth, borderHeight, hWnd, nullptr, nullptr, nullptr);
+			textCtrl[i] = CreateWindow(L"STATIC", menuItemNameMap.at(i), WS_VISIBLE | WS_CHILD | SS_NOTIFY | SS_CENTER, theXCoor, theYCoor, borderWidth, borderHeight, hWnd, (HMENU)menuItemFunction.at(i), nullptr, nullptr);
 			SendMessage(textCtrl[i], WM_SETFONT, (WPARAM)hFont, TRUE);
 			SetWindowSubclass(textCtrl[i], OwnerTxtProc, 0, 0);
 			counter++;
@@ -3283,6 +3313,22 @@ LRESULT CALLBACK CustomContextMenuProc(HWND hWnd, UINT message, WPARAM wParam, L
 
 	case WM_COMMAND:
 	{
+		//mine
+		int wmId = LOWORD(wParam);
+
+		switch (wmId) {
+			//this is for dummy function, not really working
+			case CUSTOM_TEXT_CONTROL: {
+				MessageBox(nullptr, L"Hello World!", L"", MB_OK);
+				DestroyWindow(hWnd);
+			}
+			//else notify the parent to handle the message
+			default: {
+				SendMessageW(GetParent(hWnd), WM_COMMAND, wmId, 0);
+				DestroyWindow(hWnd);
+			}
+		}
+		//----
 		break;
 	}
 
